@@ -59,8 +59,31 @@ document.addEventListener("DOMContentLoaded", () => {
             nameSpan.className = "participant-name";
             nameSpan.textContent = p;
 
+            const deleteBtn = document.createElement("button");
+            deleteBtn.className = "delete-btn";
+            deleteBtn.innerHTML = "&#10005;";
+            deleteBtn.title = "Remove participant";
+            deleteBtn.addEventListener("click", async (e) => {
+              e.preventDefault();
+              try {
+                const response = await fetch(
+                  `/activities/${encodeURIComponent(name)}/unregister?email=${encodeURIComponent(p)}`,
+                  { method: "DELETE" }
+                );
+                if (response.ok) {
+                  fetchActivities(); // Refresh the activities list
+                } else {
+                  alert("Failed to remove participant");
+                }
+              } catch (error) {
+                console.error("Error removing participant:", error);
+                alert("Error removing participant");
+              }
+            });
+
             li.appendChild(avatar);
             li.appendChild(nameSpan);
+            li.appendChild(deleteBtn);
             participantsUl.appendChild(li);
           });
         } else {
@@ -105,6 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        fetchActivities(); // Refresh activities to show updated participants
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
